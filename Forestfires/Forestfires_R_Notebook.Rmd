@@ -1,0 +1,101 @@
+---
+output:
+  html_document: default
+  html_notebook: default
+---
+# Support Vector Machine
+
+### Problem Statement:- Prepare support vector machines model for classifying the area under fire for foresfires data
+
+### Data Understanding
+```{r}
+# Loading the Train Dataset
+forest <- read.csv("~/desktop/Digi 360/Module 24/forestfires.csv")
+head(forest)
+```
+```{r}
+table(forest$size_category)
+```
+
+```{r}
+#Deleting Month and day columns since they are already encoded.
+forest <- forest[, -c(1,2)]
+head(forest)
+```
+
+```{r}
+# Loading required libraries
+library(kernlab)
+```
+
+# Splitting Raw dataset
+
+```{r}
+library(caret)
+train_index <- createDataPartition(forest$size_category, p=0.75, list=FALSE)
+
+forest_train <- forest[train_index,]
+forest_test <- forest[-train_index,]
+```
+
+
+```{r}
+head(forest_train)
+```
+
+
+### Building the Model (Linear Kernel)
+
+```{r}
+forest_svm <- ksvm(size_category ~ . , data = forest_train, kernel = "vanilladot")
+forest_svm
+```
+
+### Predicting on Test Data
+
+```{r}
+pred_svm <- predict(forest_svm, forest_test)
+head(pred_svm)
+```
+
+The variable “pred_svm” stores the small and large levels corresponding to all the records. To read it properly let’s create a confusion matrix out of it.
+
+
+### Confusion Matrix
+
+```{r}
+table(pred_svm, forest_test$size_category)
+```
+
+```{r}
+agreement <- pred_svm == forest_test$size_category
+table(agreement)
+prop.table(table(agreement))
+```
+
+### Improving Model Performance. (RBF Kernel)
+
+```{r}
+forest_svm_rbf <- ksvm(size_category ~ . , data = forest_train, kernel = "rbfdot")
+forest_svm_rbf
+```
+
+### Predictions on Test data
+
+```{r}
+pred_svm_rbf <- predict(forest_svm_rbf, forest_test)
+head(pred_svm_rbf)
+```
+
+```{r}
+agreement_rbf <- pred_svm_rbf == forest_test$size_category
+table(agreement_rbf)
+prop.table(table(agreement_rbf))
+```
+
+### Validation Observations
+
+  - The accuracy with linear kernel is 98% 
+  - The accuracy with rbf kernel is 85%. 
+
+We can conclude that the given problem is linear in nature. 

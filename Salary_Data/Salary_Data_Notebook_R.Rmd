@@ -1,0 +1,109 @@
+# Support Vector Machine
+
+### Problem Statement:- To Predict Salary level of customers. 
+
+```{r}
+# Loading the Train Dataset
+salary_train <- read.csv("~/desktop/Digi 360/Module 24/SalaryData_Train.csv")
+head(salary_train)
+```
+```{r}
+table(salary_train$Salary)
+```
+```{r}
+salary_train$Salary <- ifelse(salary_train$Salary == ' <=50K', "Low", "High")
+head(salary_train)
+```
+
+```{r}
+table(salary_train$Salary)
+```
+
+The problem here is that the variable “Salary” in the char data type, which is a problem. As there are only two levels in this variable, high and low, hence we have to convert it into factor data type.
+
+```{r}
+salary_train$Salary <- as.factor(salary_train$Salary)
+head(salary_train)
+```
+
+```{r}
+# Loading required libraries
+library(kernlab)
+```
+
+### Building the Model (Linear Kernel)
+
+
+```{r}
+salary_svm <- ksvm(Salary ~ . , data = salary_train, kernel = "vanilladot")
+salary_svm
+```
+
+
+```{r}
+# Loading the Test Dataset
+salary_test <- read.csv("~/desktop/Digi 360/Module 22/Datasets-6/SalaryData_Test.csv")
+head(salary_test)
+```
+
+```{r}
+salary_test$Salary <- ifelse(salary_test$Salary == ' <=50K', "Low", "High")
+head(salary_test)
+```
+
+```{r}
+table(salary_test$Salary)
+```
+```{r}
+salary_test$Salary <- as.factor(salary_test$Salary)
+head(salary_test)
+```
+
+### Predicting on Test Data
+
+```{r}
+pred_svm <- predict(salary_svm, salary_test)
+head(pred_svm)
+```
+
+The variable “pred_nb” stores the high and low levels corresponding to all the records. To read it properly let’s create a confusion matrix out of it.
+
+
+### Confusion Matrix
+
+```{r}
+table(pred_svm, salary_test$Salary)
+```
+
+```{r}
+agreement <- pred_svm == salary_test$Salary
+table(agreement)
+prop.table(table(agreement))
+```
+
+### Improving Model Performance. (RBF Kernel)
+
+```{r}
+salary_svm_rbf <- ksvm(Salary ~ . , data = salary_train, kernel = "rbfdot")
+salary_svm_rbf
+```
+
+### Predictions on Test data
+
+```{r}
+pred_svm_rbf <- predict(salary_svm_rbf, salary_test)
+head(pred_svm_rbf)
+```
+
+```{r}
+agreement_rbf <- pred_svm_rbf == salary_test$Salary
+table(agreement_rbf)
+prop.table(table(agreement_rbf))
+```
+
+### Validation Observations
+
+  - The accuracy with linear kernel is 85% 
+  - The accuracy with rbf kernel is 85%. 
+
+We can conclude that the given problem is linear in nature. 
